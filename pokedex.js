@@ -63,27 +63,38 @@ function closeModalWithAnimation() {
     setTimeout(() => {
         pokemonModal.classList.remove('animate__animated', 'animate__fadeOut');
         pokemonModal.classList.add('hidden');
+        document.body.style.overflow = 'auto'; // Re-enable scrolling
     }, 300);
 }
 
 // Fetch Pokemon from PokeAPI
 async function fetchPokemon() {
     try {
-        // Show loading spinner
-        pokemonGrid.innerHTML = '<div class="col-span-full flex justify-center py-12"><div class="loader"></div></div>';
+        // Show loading indicator at the bottom of the grid
+        const loadingElement = document.createElement('div');
+        loadingElement.className = 'col-span-full flex justify-center py-12 loading-indicator';
+        loadingElement.innerHTML = '<div class="loader"></div>';
+        
+        // If it's the first load, replace content, otherwise append loader
+        if (currentOffset === 0) {
+            pokemonGrid.innerHTML = '';
+            pokemonGrid.appendChild(loadingElement);
+        } else {
+            // Remove any existing loader
+            const existingLoader = pokemonGrid.querySelector('.loading-indicator');
+            if (existingLoader) {
+                pokemonGrid.removeChild(existingLoader);
+            }
+            pokemonGrid.appendChild(loadingElement);
+        }
 
         const response = await fetch(`${baseUrl}pokemon?offset=${currentOffset}&limit=${limit}`);
         const data = await response.json();
         
-        // If it's the first load, replace the content. Otherwise, append.
-        if (currentOffset === 0) {
-            pokemonGrid.innerHTML = '';
-        } else {
-            // Remove loader if it exists
-            const loader = pokemonGrid.querySelector('.loader')?.parentElement;
-            if (loader) {
-                pokemonGrid.removeChild(loader);
-            }
+        // Remove loading indicator
+        const loader = pokemonGrid.querySelector('.loading-indicator');
+        if (loader) {
+            pokemonGrid.removeChild(loader);
         }
 
         // Fetch details for each Pokemon
@@ -94,7 +105,19 @@ async function fetchPokemon() {
         currentOffset += limit;
     } catch (error) {
         console.error('Error fetching Pokemon:', error);
-        pokemonGrid.innerHTML = '<div class="col-span-full text-center text-red-600">Failed to load Pokemon. Please try again later.</div>';
+        const loader = pokemonGrid.querySelector('.loading-indicator');
+        if (loader) {
+            pokemonGrid.removeChild(loader);
+        }
+        
+        if (currentOffset === 0) {
+            pokemonGrid.innerHTML = '<div class="col-span-full text-center text-red-600">Failed to load Pokemon. Please try again later.</div>';
+        } else {
+            const errorElement = document.createElement('div');
+            errorElement.className = 'col-span-full text-center text-red-600';
+            errorElement.textContent = 'Failed to load more Pokemon. Please try again later.';
+            pokemonGrid.appendChild(errorElement);
+        }
     }
 }
 
@@ -365,9 +388,11 @@ function searchPokemon() {
                 </div>
             `;
             
-            // Add event listener to reset button
+            // Add event listener to the reset button
             document.getElementById('resetSearchBtn').addEventListener('click', () => {
+                searchInput.value = '';
                 currentOffset = 0;
+                pokemonGrid.innerHTML = '';
                 fetchPokemon();
             });
         });
@@ -375,33 +400,18 @@ function searchPokemon() {
 
 // Get a random Pokemon
 function getRandomPokemon() {
-    // There are approximately 898 Pokemon in the API
-    const randomId = Math.floor(Math.random() * 898) + 1;
-    
     // Show loading spinner
     pokemonGrid.innerHTML = '<div class="col-span-full flex justify-center py-12"><div class="loader"></div></div>';
+    
+    // There are approximately 898 Pokemon in the API
+    const randomId = Math.floor(Math.random() * 898) + 1;
     
     fetch(`${baseUrl}pokemon/${randomId}`)
         .then(response => response.json())
         .then(pokemon => {
             pokemonGrid.innerHTML = '';
             renderPokemonCard(pokemon);
-            
-            // Add a "Show All" button when displaying random Pokemon
-            const resetDiv = document.createElement('div');
-            resetDiv.className = 'col-span-full text-center mt-8';
-            resetDiv.innerHTML = `
-                <button id="resetRandomBtn" class="bg-pokeblue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-                    Show All Pokemon
-                </button>
-            `;
-            pokemonGrid.appendChild(resetDiv);
-            
-            // Add event listener to reset button
-            document.getElementById('resetRandomBtn').addEventListener('click', () => {
-                currentOffset = 0;
-                fetchPokemon();
-            });
+            currentOffset = 0; // Reset offset for when "Load More" is clicked again
         })
         .catch(error => {
             console.error('Error fetching random Pokemon:', error);
@@ -409,36 +419,16 @@ function getRandomPokemon() {
         });
 }
 
-// Event delegation for dynamically added buttons
-document.addEventListener('click', function(e) {
-    // Handle clicks on the document
-    if (e.target.id === 'resetSearchBtn' || e.target.id === 'resetRandomBtn') {
-        currentOffset = 0;
-        fetchPokemon();
-    }
-    
-    // Close modal when clicking outside of modal content
+// Add event listener for clicking outside modal to close it
+window.addEventListener('click', (e) => {
     if (e.target === pokemonModal) {
         closeModalWithAnimation();
     }
 });
 
-// Add keyboard support for modal
-document.addEventListener('keydown', (e) => {
+// Add keyboard event to close modal with Escape key
+window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !pokemonModal.classList.contains('hidden')) {
         closeModalWithAnimation();
     }
-});
-
-// Handle browser back button to close modal
-window.addEventListener('popstate', () => {
-    if (!pokemonModal.classList.contains('hidden')) {
-        pokemonModal.classList.add('hidden');
-        document.body.style.overflow = 'auto'; // Re-enable scrolling
-    }
-});
-
-// Reset body overflow when modal is closed
-closeModal.addEventListener('click', () => {
-    document.body.style.overflow = 'auto';
 });
