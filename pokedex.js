@@ -211,113 +211,137 @@ async function showPokemonDetails(pokemonId) {
             `<span class="capitalize">${ability.ability.name.replace('-', ' ')}</span>`
         ).join(', ');
         
-        // Build the modal content
+        // Build the modal content with horizontal layout
         modalContent.innerHTML = `
-            <div class="bg-${typeColors[pokemon.types[0].type.name]} rounded-t-xl p-6 pb-16 relative">
-                <h2 class="font-pokemon text-white text-2xl capitalize mb-2">${pokemon.name.replace('-', ' ')}</h2>
-                <span class="text-white opacity-70 font-bold">#${String(pokemon.id).padStart(3, '0')}</span>
-                
-                <div class="flex justify-center mt-4">
-                    <img src="${pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}" 
-                         alt="${pokemon.name}" 
-                         class="w-48 h-48 object-contain animate-bounce">
+            <div class="flex flex-col md:flex-row bg-white rounded-xl overflow-hidden">
+                <!-- Left section with image and basic info -->
+                <div class="bg-${typeColors[pokemon.types[0].type.name]} md:w-1/3 p-6 flex flex-col items-center justify-center relative">
+                    <h2 class="font-pokemon text-white text-2xl capitalize mb-2">${pokemon.name.replace('-', ' ')}</h2>
+                    <span class="text-white opacity-70 font-bold">#${String(pokemon.id).padStart(3, '0')}</span>
+                    
+                    <div class="flex justify-center my-6">
+                        <img src="${pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}" 
+                             alt="${pokemon.name}" 
+                             class="w-40 h-40 object-contain animate-float">
+                    </div>
+                    
+                    <div class="flex justify-center gap-2 mt-2">
+                        ${pokemon.types.map(typeInfo => `
+                            <span class="type-badge capitalize px-3 py-1 rounded-full bg-white bg-opacity-30 text-white text-sm font-semibold">
+                                ${typeInfo.type.name}
+                            </span>
+                        `).join('')}
+                    </div>
                 </div>
                 
-                <div class="flex justify-center gap-2 mt-4">
-                    ${pokemon.types.map(typeInfo => `
-                        <span class="type-badge capitalize px-3 py-1 rounded-full bg-white bg-opacity-30 text-white text-sm font-semibold">
-                            ${typeInfo.type.name}
-                        </span>
-                    `).join('')}
-                </div>
-            </div>
-            
-            <div class="p-6 -mt-8 bg-white rounded-xl max-h-96 overflow-y-auto">
-                <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
-                    <h3 class="font-pokemon text-gray-800 text-lg mb-2">Pokédex Entry</h3>
-                    <p class="text-gray-600">${flavorText}</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-50 rounded-xl p-4">
-                        <h3 class="font-pokemon text-gray-800 text-lg mb-4">Details</h3>
+                <!-- Right section with details -->
+                <div class="md:w-2/3 p-6 max-h-96 overflow-y-auto">
+                    <div class="bg-gray-50 rounded-xl shadow-lg p-4 mb-6">
+                        <h3 class="font-pokemon text-gray-800 text-lg mb-2">Pokédex Entry</h3>
+                        <p class="text-gray-600">${flavorText}</p>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="bg-gray-50 rounded-xl p-4 flex-1">
+                            <h3 class="font-pokemon text-gray-800 text-lg mb-4">Details</h3>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Height</p>
+                                    <p class="text-gray-800 font-bold">${pokemon.height / 10} m</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Weight</p>
+                                    <p class="text-gray-800 font-bold">${pokemon.weight / 10} kg</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Habitat</p>
+                                    <p class="text-gray-800 font-bold capitalize">${habitat}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm">Generation</p>
+                                    <p class="text-gray-800 font-bold">${generation}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <p class="text-gray-500 text-sm">Abilities</p>
+                                    <p class="text-gray-800 font-bold">${abilities}</p>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <p class="text-gray-500 text-sm">Height</p>
-                                <p class="text-gray-800 font-bold">${pokemon.height / 10} m</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-sm">Weight</p>
-                                <p class="text-gray-800 font-bold">${pokemon.weight / 10} kg</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-sm">Habitat</p>
-                                <p class="text-gray-800 font-bold capitalize">${habitat}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-sm">Generation</p>
-                                <p class="text-gray-800 font-bold">${generation}</p>
-                            </div>
-                            <div class="col-span-2">
-                                <p class="text-gray-500 text-sm">Abilities</p>
-                                <p class="text-gray-800 font-bold">${abilities}</p>
+                        <div class="bg-gray-50 rounded-xl p-4 flex-1">
+                            <h3 class="font-pokemon text-gray-800 text-lg mb-4">Base Stats</h3>
+                            
+                            <div class="space-y-3">
+                                ${pokemon.stats.map(stat => {
+                                    const statName = stat.stat.name.replace('-', ' ');
+                                    const statValue = stat.base_stat;
+                                    const percentage = Math.min(100, (statValue / 150) * 100);
+                                    
+                                    let barColor;
+                                    if (percentage < 30) barColor = 'bg-red-500';
+                                    else if (percentage < 60) barColor = 'bg-yellow-500';
+                                    else barColor = 'bg-green-500';
+                                    
+                                    return `
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-700 capitalize">${statName}</span>
+                                                <span class="text-gray-700 font-bold">${statValue}</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                                                <div class="${barColor} h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-xl p-4">
-                        <h3 class="font-pokemon text-gray-800 text-lg mb-4">Base Stats</h3>
-                        
-                        <div class="space-y-3">
-                            ${pokemon.stats.map(stat => {
-                                const statName = stat.stat.name.replace('-', ' ');
-                                const statValue = stat.base_stat;
-                                const percentage = Math.min(100, (statValue / 150) * 100);
-                                
-                                let barColor;
-                                if (percentage < 30) barColor = 'bg-red-500';
-                                else if (percentage < 60) barColor = 'bg-yellow-500';
-                                else barColor = 'bg-green-500';
-                                
-                                return `
-                                    <div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-700 capitalize">${statName}</span>
-                                            <span class="text-gray-700 font-bold">${statValue}</span>
+                    ${evolutionData.length > 0 ? `
+                        <div class="mt-6 bg-gray-50 rounded-xl p-4">
+                            <h3 class="font-pokemon text-gray-800 text-lg mb-4">Evolution Chain</h3>
+                            <div class="flex flex-wrap justify-center items-center gap-4">
+                                ${evolutionData.map((evo, index) => `
+                                    <div class="text-center flex flex-col items-center">
+                                        <div class="cursor-pointer evolution-card hover:scale-110 transition-transform duration-200" 
+                                             data-pokemon-name="${evo.name}">
+                                            <img src="${evo.image}" alt="${evo.name}" class="w-20 h-20 object-contain mx-auto">
+                                            <p class="text-sm font-bold capitalize mt-1">${evo.name.replace('-', ' ')}</p>
                                         </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                                            <div class="${barColor} h-2.5 rounded-full" style="width: ${percentage}%"></div>
-                                        </div>
+                                        ${index < evolutionData.length - 1 ? `
+                                            <div class="mx-2 my-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                </svg>
+                                            </div>
+                                        ` : ''}
                                     </div>
-                                `;
-                            }).join('')}
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
+                    ` : ''}
                 </div>
-                
-                ${evolutionData.length > 0 ? `
-                    <div class="mt-6 bg-gray-50 rounded-xl p-4">
-                        <h3 class="font-pokemon text-gray-800 text-lg mb-4">Evolution Chain</h3>
-                        <div class="flex flex-wrap justify-center items-center gap-4">
-                            ${evolutionData.map((evo, index) => `
-                                <div class="text-center flex flex-col items-center">
-                                    <img src="${evo.image}" alt="${evo.name}" class="w-20 h-20 object-contain mx-auto">
-                                    <p class="text-sm font-bold capitalize mt-1">${evo.name.replace('-', ' ')}</p>
-                                    ${index < evolutionData.length - 1 ? `
-                                        <div class="mx-2 my-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                            </svg>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
             </div>
         `;
+        
+        // Add event listeners to evolution cards
+        const evolutionCards = document.querySelectorAll('.evolution-card');
+        evolutionCards.forEach(card => {
+            card.addEventListener('click', async () => {
+                const pokemonName = card.getAttribute('data-pokemon-name');
+                try {
+                    // Fetch the Pokemon ID using the name
+                    const response = await fetch(`${baseUrl}pokemon/${pokemonName}`);
+                    const pokemon = await response.json();
+                    // Show that Pokemon's details
+                    showPokemonDetails(pokemon.id);
+                } catch (error) {
+                    console.error('Error fetching evolution Pokemon:', error);
+                }
+            });
+        });
     } catch (error) {
         console.error('Error fetching Pokemon details:', error);
         modalContent.innerHTML = '<div class="p-6 text-center text-red-600">Failed to load Pokemon details. Please try again later.</div>';
