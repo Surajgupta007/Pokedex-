@@ -61,6 +61,21 @@
     <style type="text/css">
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+        
         .font-pokemon {
             font-family: 'Press Start 2P', cursive;
         }
@@ -95,6 +110,40 @@
             background: #333;
             width: 100%;
             height: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .mini-pokeball {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(to bottom, #ff0000 0%, #ff0000 50%, #f0f0f0 50%, #f0f0f0 100%);
+            border-radius: 50%;
+            border: 2px solid #333;
+            display: inline-block;
+            margin: 0 5px;
+        }
+        
+        .mini-pokeball::before {
+            content: '';
+            position: absolute;
+            background: #f0f0f0;
+            width: 4px;
+            height: 4px;
+            border: 1px solid #333;
+            border-radius: 50%;
+            bottom: 6px;
+            right: 6px;
+            z-index: 1;
+        }
+        
+        .mini-pokeball::after {
+            content: '';
+            position: absolute;
+            background: #333;
+            width: 100%;
+            height: 2px;
             top: 50%;
             transform: translateY(-50%);
         }
@@ -156,45 +205,93 @@
             background-size: contain;
             vertical-align: middle;
         }
+
+        .navbar-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #FFDE00;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-pokelightyellow to-pokeyellow min-h-screen">
-    <header class="bg-pokered py-4 shadow-lg relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png')] opacity-5 bg-repeat"></div>
-        <div class="container mx-auto px-4 flex flex-col items-center md:flex-row md:justify-between relative z-10">
-            <div class="flex items-center mb-4 md:mb-0">
-                <div class="pokeball mr-4"></div>
-                <h1 class="font-pokemon text-white text-2xl md:text-3xl tracking-wider">PokéFinder</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Search Pokémon..." class="py-2 px-4 rounded-full w-64 border-2 border-pokeblue focus:outline-none focus:border-pokeyellow">
-                    <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-pokered hover:text-pokeblue">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+<body class="bg-gradient-to-br from-pokelightyellow to-pokeyellow">
+    <div id="app-container">
+        <header class="navbar-shadow bg-pokered py-4 sticky top-0 z-50">
+            <div class="absolute top-0 left-0 w-full h-full bg-[url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png')] opacity-5 bg-repeat"></div>
+            <div class="container mx-auto px-4 flex flex-col items-center md:flex-row md:justify-between relative z-10">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="pokeball mr-4"></div>
+                    <h1 class="font-pokemon text-white text-2xl md:text-3xl tracking-wider">PokéFinder</h1>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <a href="#" class="nav-link text-white hidden md:inline-block hover:text-pokeyellow">Home</a>
+                    <a href="#" class="nav-link text-white hidden md:inline-block hover:text-pokeyellow">Favorites</a>
+                    <a href="#" class="nav-link text-white hidden md:inline-block hover:text-pokeyellow">About</a>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Search Pokémon..." class="py-2 px-4 rounded-full w-48 md:w-64 border-2 border-pokeblue focus:outline-none focus:border-pokeyellow">
+                        <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-pokered hover:text-pokeblue">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <button id="randomBtn" class="bg-pokeblue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 animate-pulse">
+                        Random
                     </button>
                 </div>
-                <button id="randomBtn" class="bg-pokeblue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 animate-pulse">
-                    Random
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 py-8 flex-grow">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="pokemonGrid">
+                <div class="col-span-full flex justify-center py-12">
+                    <div class="loader"></div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-center">
+                <button id="loadMoreBtn" class="bg-pokered hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105">
+                    Load More Pokémon
                 </button>
             </div>
-        </div>
-    </header>
-
-    <main class="container mx-auto px-4 py-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="pokemonGrid">
-            <div class="col-span-full flex justify-center py-12">
-                <div class="loader"></div>
-            </div>
-        </div>
+        </main>
         
-        <div class="mt-8 flex justify-center">
-            <button id="loadMoreBtn" class="bg-pokered hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105">
-                Load More Pokémon
-            </button>
-        </div>
-    </main>
+        <footer class="bg-pokeblue text-white py-6 mt-auto">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0 flex items-center">
+                        <div class="mini-pokeball mr-2"></div>
+                        <p class="text-center md:text-left font-pokemon text-sm">PokéFinder © 2025</p>
+                        <div class="mini-pokeball ml-2"></div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="mini-pokeball"></span>
+                        <span class="text-sm font-pokemon">Gotta Catch 'Em All!</span>
+                        <span class="mini-pokeball"></span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
     
     <!-- Pokemon Detail Modal -->
     <div id="pokemonModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
@@ -213,32 +310,6 @@
         </div>
     </div>
     
-    <footer class="bg-pokeblue text-white py-6">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p class="text-center md:text-left font-pokemon text-sm">PokéFinder © 2025</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="#" class="hover:text-pokeyellow transition duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.618 15.764c-.102.152-.277.207-.426.105-1.169-.69-2.637-.855-4.362-.465-.167.038-.332-.079-.37-.246-.038-.167.079-.332.246-.37 1.888-.427 3.486-.241 4.806.513.152.101.207.276.106.463zM17.123 13.078c-.127.187-.376.255-.569.127-1.341-.814-3.38-1.045-4.971-.573-.207.058-.427-.066-.489-.278-.058-.212.066-.432.278-.49 1.806-.523 4.053-.274 5.628.676.193.122.255.375.123.538zm.094-2.54c-1.607-.977-4.249-1.064-5.786-.587-.246.078-.513-.063-.587-.307s.063-.513.307-.587c1.755-.536 4.672-.434 6.513.675.233.141.305.449.164.681-.141.232-.45.304-.611.125z" />
-                        </svg>
-                    </a>
-                    <a href="#" class="hover:text-pokeyellow transition duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.323-.593 1.323-1.325V1.325C24 .593 23.407 0 22.675 0z" />
-                        </svg>
-                    </a>
-                    <a href="#" class="hover:text-pokeyellow transition duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 14-7.503 14-14 0-.21-.016-.422-.031-.629.962-.689 1.8-1.56 2.463-2.548z" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
     <script src="pokedex.js"></script>
 </body>
 </html>
